@@ -2,10 +2,19 @@ package gbc.ds.assignment2;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.util.Pair;
-
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class TicTacToeController implements Initializable {
@@ -41,11 +50,96 @@ public class TicTacToeController implements Initializable {
     //          - In case there is not a way to detect which Pane is begin hit and return the coordinate,
     //                  please, make a field in this class and set the coordinate to the field.
 
-    // Task 3
-    // TODO: Add below all the functions for the game to start, the user must enter his/her name and then hit GO,
-    //          When GO is hit, Difficulty (Week & Intelligent AI) must become enabled and the user must select one of them,
-    //          there must be a function that sets the difficulty to a field in this class for later usage.
-    //          After you select a difficulty the player must be able to click a Pane.
-    //          Bonus: make the Pane to glow of something when you hover it.
-    //          Bonus 2: make the Pane to have a click animation (change color or something, nothing fancy).
+    public void startMenu() {
+        Dialog<ButtonType> box = new Dialog<>();
+        box.setTitle("Tic Tac Toe");
+        box.setHeaderText("Please fill in your information before you begin!");
+
+        Label nl = new Label("Name:");
+        TextField name = new TextField();
+        Label dl = new Label("Difficulty:");
+        ToggleGroup difficulty = new ToggleGroup();
+        RadioButton weak = new RadioButton("Weak");
+        weak.setToggleGroup(difficulty);
+        weak.setSelected(true);
+        RadioButton intelligent = new RadioButton("Intelligent");
+        intelligent.setToggleGroup(difficulty);
+
+        Label nl2 = new Label("Choose your symbol:");
+        ToggleGroup symbol = new ToggleGroup();
+        RadioButton x = new RadioButton("X's");
+        x.setToggleGroup(symbol);
+        x.setSelected(true);
+        RadioButton o = new RadioButton("O's");
+        o.setToggleGroup(symbol);
+
+        VBox inputBox = new VBox(15, nl, name, dl, weak, intelligent, nl2, x, o);
+
+        box.getDialogPane().setContent(inputBox);
+
+        ButtonType go = new ButtonType("Go", ButtonBar.ButtonData.OK_DONE);
+        box.getDialogPane().getButtonTypes().addAll(go, ButtonType.CANCEL);
+
+        Node goButton = box.getDialogPane().lookupButton(go);
+        goButton.setDisable(true);
+        name.textProperty().addListener((observable, oldValue, newValue) -> goButton.setDisable(newValue.trim().isEmpty()));
+
+        Optional<ButtonType> result = box.showAndWait();
+
+        if (result.isPresent() && result.get() == go) {
+            String user = name.getText();
+            String userDiff = "";
+            String userSymbol = "";
+            if (intelligent.isSelected()){
+                userDiff = "Intelligent";
+            }
+            else{
+                userDiff = "Weak";
+            }
+
+            if (x.isSelected()){
+                userSymbol = "X";
+            }
+            else{
+                userSymbol = "O";
+            }
+
+            startGame(user, userDiff, userSymbol);
+        }
+    }
+
+    public void startGame(String user, String userDiff, String userSymbol) {
+        final int SIZE = 3;
+        final int CELL_SIZE = 100;
+        final Color HOVER_COLOR = Color.LIGHTGRAY;
+        final Color CLICKED_COLOR = Color.LIGHTBLUE;
+        GridPane game = new GridPane();
+        game.setAlignment(Pos.CENTER);
+        game.setHgap(5);
+        game.setVgap(5);
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                Rectangle cell = new Rectangle(CELL_SIZE, CELL_SIZE, Color.WHITE);
+                cell.setStroke(Color.BLACK);
+                int row = i;
+                int col = j;
+                cell.setOnMouseEntered(event -> cell.setFill(HOVER_COLOR));
+                cell.setOnMouseExited(event -> cell.setFill(Color.WHITE));
+                cell.setOnMouseClicked(event -> {
+                    cell.setFill(CLICKED_COLOR);
+                    Label symbol = new Label(userSymbol);
+                    symbol.setStyle("-fx-font-size: 72px;");
+                    StackPane pane_with_symbol = new StackPane(symbol);
+                    pane_with_symbol.setBackground(new Background(new BackgroundFill(CLICKED_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
+                    game.add(pane_with_symbol, col, row);
+                });
+                game.add(cell, j, i);
+            }
+        }
+        Scene scene = new Scene(game);
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setTitle("Welcome! " + user);
+        stage.show();
+    }
 }

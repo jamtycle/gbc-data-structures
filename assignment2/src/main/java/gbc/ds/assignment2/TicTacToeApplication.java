@@ -9,12 +9,9 @@ import java.io.IOException;
 
 public class TicTacToeApplication extends Application {
     @Override
-    public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(TicTacToeApplication.class.getResource("main.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        stage.setTitle("Tic Tac Toe");
-        stage.setScene(scene);
-        stage.show();
+    public void start(Stage primaryStage) throws Exception {
+        TicTacToeController controller = new TicTacToeController();
+        controller.startMenu();
     }
 
     public static void main(String[] args) {
